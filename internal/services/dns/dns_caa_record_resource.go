@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"time"
+	"regexp"
 
 	"github.com/hashicorp/go-azure-helpers/lang/pointer"
 	"github.com/hashicorp/go-azure-helpers/lang/response"
