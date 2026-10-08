@@ -97,6 +97,22 @@ func TestAccDnsCaaRecord_withTags(t *testing.T) {
 	})
 }
 
+func TestAccDnsCaaRecord_additionalTags(t *testing.T) {
+	data := acceptance.BuildTestData(t, "azurerm_dns_caa_record", "test")
+	r := DnsCaaRecordResource{}
+
+	data.ResourceTest(t, r, []acceptance.TestStep{
+		{
+			Config: r.additionalTags(data),
+			Check: acceptance.ComposeTestCheckFunc(
+				check.That(data.ResourceName).ExistsInAzure(r),
+				check.That(data.ResourceName).Key("record.#").HasValue("3"),
+			),
+		},
+		data.ImportStep(),
+	})
+}
+
 func (DnsCaaRecordResource) Exists(ctx context.Context, clients *clients.Client, state *pluginsdk.InstanceState) (*bool, error) {
 	id, err := recordsets.ParseRecordTypeID(state.ID)
 	if err != nil {
@@ -331,6 +347,50 @@ resource "azurerm_dns_caa_record" "test" {
 
   tags = {
     environment = "staging"
+  }
+}
+`, data.RandomInteger, data.Locations.Primary, data.RandomInteger, data.RandomInteger)
+}
+
+func (DnsCaaRecordResource) additionalTags(data acceptance.TestData) string {
+	return fmt.Sprintf(`
+provider "azurerm" {
+  features {}
+}
+
+resource "azurerm_resource_group" "test" {
+  name     = "acctestRG-%d"
+  location = "%s"
+}
+
+resource "azurerm_dns_zone" "test" {
+  name                = "acctestzone%d.com"
+  resource_group_name = azurerm_resource_group.test.name
+}
+
+resource "azurerm_dns_caa_record" "test" {
+  name                = "myarecord%d"
+  resource_group_name = azurerm_resource_group.test.name
+  zone_name           = azurerm_dns_zone.test.name
+  ttl                 = 300
+
+  record {
+    flags = 0
+    tag   = "issue"
+    value = "example.com"
+  }
+
+  # not part of the previous hard-coded allow-list
+  record {
+    flags = 0
+    tag   = "issuemail"
+    value = "example.com"
+  }
+
+  record {
+    flags = 0
+    tag   = "contactemail"
+    value = "security@example.com"
   }
 }
 `, data.RandomInteger, data.Locations.Primary, data.RandomInteger, data.RandomInteger)
