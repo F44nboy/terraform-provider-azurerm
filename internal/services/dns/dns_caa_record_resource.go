@@ -79,12 +79,6 @@ func resourceDnsCaaRecord() *pluginsdk.Resource {
 						"tag": {
 							Type:     pluginsdk.TypeString,
 							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"issue",
-								"issuewild",
-								"iodef",
-								"contactemail",
-							}, false),
 						},
 
 						"value": {
