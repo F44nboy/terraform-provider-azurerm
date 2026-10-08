@@ -75,12 +75,17 @@ func resourceDnsCaaRecord() *pluginsdk.Resource {
 							Type:     pluginsdk.TypeInt,
 							Required: true,
 						},
-
 						"tag": {
 							Type:     pluginsdk.TypeString,
 							Required: true,
+							ValidateFunc: validation.All(
+								validation.StringLenBetween(1, 255),
+								validation.StringMatch(
+									regexp.MustCompile(`^[a-z0-9]+$`),
+									"`tag` must only contain lowercase letters and digits",
+								),
+							),
 						},
-
 						"value": {
 							Type:     pluginsdk.TypeString,
 							Required: true,
